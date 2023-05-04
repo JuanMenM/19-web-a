@@ -1,5 +1,7 @@
 import User from '../models/User.js';
 import bcrypt from "bcryptjs";
+import jwt from 'jsonwebtoken';
+import config from '../config.js';
 
 export const signup = async( req, res ) => {
     const { name, email, password } = req.body;
@@ -31,7 +33,26 @@ export const login = async ( req, res ) => {
     } else {
         ////
         //If it does, Verify the password
+        console.log( bcrypt.compareSync( password, findEmail[0].password ) )
+        
+        if ( password && bcrypt.compareSync( password, findEmail[0].password ) ) {
+            //Create JWT token
+            const token = jwt.sign(
+                //Payload
+                { role: 'admin', id: findEmail[0]._id }, config.secret,
+                //Expires in (seconds)
+                { expiresIn: 180 }
+            )
+            res.status(200).json({token})
+        } else {
+            // The password does not match
+            res.status(400).json({"message": "the password does not match with the current email account!!"})
+        }
+       
+
+
         //Create JWT and send it to the client
+        
         
     }
     return true
